@@ -1,11 +1,18 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000
 });
 
 const sendEmail = async (to, subject, text, html = null) => {
@@ -23,11 +30,19 @@ const sendEmail = async (to, subject, text, html = null) => {
       html: html || `<pre>${text}</pre>`
     };
 
-    const result = await transporter.sendMail(mailOptions);
+    // Set timeout for email sending
+    const result = await Promise.race([
+      transporter.sendMail(mailOptions),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email timeout')), 8000)
+      )
+    ]);
+    
     console.log('Email sent successfully:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Email send error:', error);
+    console.error('Email send error:', error.message);
+    // Don't fail registration if email fails
     return { success: false, error: error.message };
   }
 };
