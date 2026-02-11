@@ -134,8 +134,8 @@ Project Details:
 
 Description: ${projectDescription}`;
 
-    // Send to admin email only (remove WhatsApp)
-    await sendEmail('admin@aitechpulze.com', '🔔 New Project Request', adminMessage);
+    // Send to admin email
+    await sendEmail(process.env.ADMIN_EMAIL || 'aitechpulze@gmail.com', '🔔 New Project Request', adminMessage);
 
     await logActivity(req.user.id, 'PROJECT_CREATED', `Project ${projectId} created`, req.ip);
     

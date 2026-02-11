@@ -19,6 +19,9 @@ router.post('/register', async (req, res) => {
 
     await logActivity(user.id, 'USER_REGISTERED', `User ${name} registered`, req.ip);
     
+    // Send registration notifications
+    await sendRegistrationNotifications(user);
+    
     res.status(201).json({ 
       success: true, 
       message: 'Registration successful',
