@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models');
-const { sendRegistrationNotifications, sendLoginNotifications } = require('../utils/notifications');
 const { logActivity } = require('../utils/logger');
 
 const router = express.Router();

@@ -3,9 +3,6 @@ const multer = require('multer');
 const path = require('path');
 const { User, Project } = require('../models');
 const { auth, adminAuth } = require('../middleware/auth');
-const { sendEmail } = require('../utils/email');
-const { sendWhatsApp } = require('../utils/whatsapp');
-const { sendSMS } = require('../utils/sms');
 const { logActivity } = require('../utils/logger');
 
 const router = express.Router();
