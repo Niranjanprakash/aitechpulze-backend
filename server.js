@@ -13,10 +13,9 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
+// CORS - Allow all origins in production for now
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://aitechpulze.com', 'https://www.aitechpulze.com'] 
-    : true,
+  origin: true,
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
