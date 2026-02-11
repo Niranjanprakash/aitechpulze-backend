@@ -17,11 +17,13 @@ router.post('/register', async (req, res) => {
     const user = await User.create({ name, email, phone, password });
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-    await logActivity(user.id, 'USER_REGISTERED', `User ${name} registered`, req.ip);
+    // Log activity
+    logActivity(user.id, 'USER_REGISTERED', `User ${name} registered`, req.ip).catch(err => console.error('Log error:', err));
     
-    // Send registration notifications
-    await sendRegistrationNotifications(user);
+    // Send notifications async (don't wait)
+    sendRegistrationNotifications(user).catch(err => console.error('Notification error:', err));
     
+    // Respond immediately
     res.status(201).json({ 
       success: true, 
       message: 'Registration successful',
