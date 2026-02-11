@@ -97,51 +97,10 @@ router.post('/', auth, upload.array('files', 5), async (req, res) => {
       }
     }
 
-    // Send notifications to user
-    const userMessage = `🎉 Project Request Submitted!
-
-Hi ${req.user.name}!
-
-Your project request has been successfully submitted:
-
-📋 Project: ${projectTitle}
-🆔 Project ID: ${projectId}
-💰 Estimated Amount: ₹${estimatedAmount}
-
-We will message you soon on WhatsApp with project details and next steps.
-
-Thank you for choosing AI Tech Pulze! 🚀`;
-
-    // Send to user via all channels
-    if (req.user.phone) {
-      await sendWhatsApp(req.user.phone, userMessage);
-      await sendSMS(req.user.phone, userMessage);
-    }
-    await sendEmail(req.user.email, '🎉 Project Request Submitted - AI Tech Pulze', userMessage);
-
-    // Send admin notifications
-    const adminMessage = `🔔 New Project Request!
-
-Project Details:
-📋 Title: ${projectTitle}
-🆔 ID: ${projectId}
-👤 Client: ${req.user.name}
-📧 Email: ${req.user.email}
-📱 Phone: ${req.user.phone || 'Not provided'}
-🏷️ Domain: ${domain}
-⚙️ Technology: ${technologyStack || 'Not specified'}
-💰 Estimated: ₹${estimatedAmount}
-
-Description: ${projectDescription}`;
-
-    // Send to admin email
-    await sendEmail(process.env.ADMIN_EMAIL || 'aitechpulze@gmail.com', '🔔 New Project Request', adminMessage);
-
-    await logActivity(req.user.id, 'PROJECT_CREATED', `Project ${projectId} created`, req.ip);
-    
+    // Respond immediately
     res.status(201).json({ 
       success: true, 
-      message: 'Project request submitted successfully! We will message you soon on WhatsApp.',
+      message: 'Project request submitted successfully!',
       data: {
         project: {
           id: project.id,
@@ -150,6 +109,11 @@ Description: ${projectDescription}`;
           estimated_amount: estimatedAmount
         }
       }
+    });
+
+    // Send notifications in background
+    setImmediate(async () => {
+      logActivity(req.user.id, 'PROJECT_CREATED', `Project ${projectId} created`, req.ip).catch(err => console.error('Log error:', err));
     });
   } catch (error) {
     console.error('Error creating project:', error);

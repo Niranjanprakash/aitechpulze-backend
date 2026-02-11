@@ -30,7 +30,6 @@ router.post('/register', async (req, res) => {
     // Do everything after response (fire and forget)
     setImmediate(() => {
       logActivity(user.id, 'USER_REGISTERED', `User ${name} registered`, req.ip).catch(err => console.error('Log error:', err));
-      sendRegistrationNotifications(user).catch(err => console.error('Notification error:', err));
     });
   } catch (error) {
     console.error('Registration error:', error);
