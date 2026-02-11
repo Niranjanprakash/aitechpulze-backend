@@ -1,48 +1,38 @@
 const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
+  host: process.env.BREVO_SMTP_HOST || 'smtp-relay.brevo.com',
+  port: process.env.BREVO_SMTP_PORT || 587,
   secure: false,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    user: process.env.BREVO_SMTP_USER,
+    pass: process.env.BREVO_SMTP_PASS
   },
   tls: {
     rejectUnauthorized: false
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000
+  }
 });
 
 const sendEmail = async (to, subject, text, html = null) => {
   try {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-      console.log('Email credentials not configured, skipping email');
+    if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_PASS) {
+      console.log('⚠️ Brevo SMTP not configured, skipping email');
       return { success: false, message: 'Email not configured' };
     }
 
     const mailOptions = {
-      from: `"AI Tech Pulze" <${process.env.EMAIL_USER}>`,
+      from: '"AI Tech Pulze" <aitechpulze@gmail.com>',
       to: to,
       subject: subject,
       text: text,
       html: html || `<pre>${text}</pre>`
     };
 
-    // Set timeout for email sending
-    const result = await Promise.race([
-      transporter.sendMail(mailOptions),
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Email timeout')), 8000)
-      )
-    ]);
-    
-    console.log('Email sent successfully:', result.messageId);
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent:', result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('Email send error:', error.message);
-    // Don't fail registration if email fails
+    console.error('❌ Email error:', error.message);
     return { success: false, error: error.message };
   }
 };
